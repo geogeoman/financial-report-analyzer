@@ -1,0 +1,10 @@
+{
+  "name": "financial-report-analyzer",
+  "version": "1.0.0",
+  "description": "深度分析上市公司财报（年报/季报），自动提取财务指标、计算比率、生成图表并输出专业HTML分析报告",
+  "author": {
+    "name": "Financial Analysis Team"
+  },
+  "keywords": ["financial", "report", "analysis", "财报", "财务分析", "financial-report", "annual-report"],
+  "license": "MIT"
+}

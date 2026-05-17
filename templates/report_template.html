@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>{{COMPANY_NAME}} {{YEAR}} 年度财报分析报告</title>
+<style>
+  :root {
+    --navy: #0f3460;
+    --dark: #16213e;
+    --accent: #e94560;
+    --green: #27ae60;
+    --light-blue: #3498db;
+    --purple: #533483;
+    --orange: #e67e22;
+    --bg: #f8f9fc;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #666;
+  }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.7;
+  }
+  h1 {
+    text-align: center;
+    font-size: 26px;
+    color: var(--dark);
+    border-bottom: 3px solid var(--navy);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+  .subtitle { text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+  h2 {
+    font-size: 20px; color: var(--navy); margin-top: 36px; margin-bottom: 16px;
+    padding-left: 12px; border-left: 4px solid var(--accent);
+  }
+  h3 { font-size: 17px; color: var(--dark); margin-top: 24px; margin-bottom: 12px; }
+  h4 { font-size: 15px; color: var(--navy); margin-top: 18px; margin-bottom: 10px; }
+
+  /* Tables */
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0 24px 0;
+    background: var(--card-bg); border-radius: 8px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  thead th {
+    background: var(--navy); color: #fff; font-weight: 600;
+    padding: 12px 16px; text-align: left; font-size: 14px;
+  }
+  tbody td { padding: 10px 16px; border-bottom: 1px solid #eef0f5; font-size: 14px; }
+  tbody tr:hover { background: #f0f4ff; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Cards */
+  .section-card {
+    background: var(--card-bg); border-radius: 10px; padding: 20px 24px;
+    margin: 16px 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  /* Highlights */
+  .highlight-positive { color: var(--green); font-weight: 600; }
+  .highlight-negative { color: var(--accent); font-weight: 600; }
+
+  /* BP Callout Box */
+  .bp-callout {
+    background: linear-gradient(135deg, #fef9e7 0%, #fef3cd 100%);
+    border-left: 4px solid #f39c12;
+    border-radius: 8px; padding: 14px 18px; margin: 16px 0;
+    font-size: 14px;
+  }
+  .bp-callout strong { color: #e67e22; }
+
+  /* Red Line Alert */
+  .red-line {
+    background: #fff5f5; border-left: 4px solid var(--accent);
+    border-radius: 8px; padding: 14px 18px; margin: 16px 0;
+    font-size: 14px;
+  }
+  .red-line strong { color: var(--accent); }
+
+  /* KPI Badge */
+  .kpi-badge {
+    display: inline-block; background: var(--navy); color: #fff;
+    padding: 3px 12px; border-radius: 12px; font-size: 12px;
+    font-weight: 600; margin: 2px 4px;
+  }
+  .kpi-badge.warn { background: var(--accent); }
+  .kpi-badge.ok { background: var(--green); }
+
+  /* Conclusion */
+  .conclusion-box {
+    background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 100%);
+    border-radius: 10px; padding: 24px; margin-top: 20px;
+  }
+  .conclusion-box strong { color: var(--navy); }
+
+  /* Segment table compact */
+  .seg-table td:first-child { font-weight: 600; }
+
+  /* Chart container */
+  .chart-container { text-align: center; margin: 20px 0; }
+  .chart-container img {
+    max-width: 100%; height: auto; border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .chart-container .chart-caption { font-size: 13px; color: #888; margin-top: 8px; }
+
+  /* Two-column chart layout */
+  .charts-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .charts-row .chart-container { flex: 1; min-width: 280px; }
+
+  /* Decision matrix table */
+  .matrix-table td { vertical-align: top; }
+  .matrix-table .quadrant-expand { background: #d4edda; }
+  .matrix-table .quadrant-harvest { background: #e8f0fe; }
+  .matrix-table .quadrant-cultivate { background: #fef9e7; }
+  .matrix-table .quadrant-exit { background: #fce4e4; }
+
+  /* Tags */
+  .tag-advantage {
+    display: inline-block; background: #d4edda; color: #155724;
+    padding: 2px 10px; border-radius: 4px; font-size: 13px; margin-right: 6px;
+  }
+  .tag-risk {
+    display: inline-block; background: #f8d7da; color: #721c24;
+    padding: 2px 10px; border-radius: 4px; font-size: 13px; margin-right: 6px;
+  }
+
+  p { margin: 8px 0; font-size: 15px; }
+  ul { padding-left: 20px; }
+  li { margin: 4px 0; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+  使用说明（Agent 必读）：
+  1. 将所有 {{占位符}} 替换为真实数据，缺失数据填写 "N/A"
+  2. 严禁删除任何章节（1-4），严禁修改表格列数
+  3. 同比增长为正时加 class="highlight-positive"，为负时加 class="highlight-negative"
+  4. 分部数据/运营指标等可选模块，有数据时完整渲染，无数据时整段留空
+  5. BP追问需结合具体数据特征撰写，不能泛泛而谈
+============================================================ -->
+
+<h1>{{COMPANY_NAME}} {{YEAR}} 年度财报分析报告</h1>
+<p class="subtitle">报告生成时间：{{DATE}} | 分析框架：财务BP视角·三表联动 | 数据来源：公司年度报告</p>
+
+<!-- ==================== 第1章 核心经营数据概览 ==================== -->
+<h2>1. 核心经营数据概览</h2>
+
+<h3>1.1 集团整体业绩</h3>
+<table>
+  <thead>
+    <tr>
+      <th>指标</th>
+      <th>本期数值</th>
+      <th>同比增长</th>
+      <th>行业平均 (参考)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>营业收入</td>
+      <td>{{REVENUE}}</td>
+      <td class="{{REVENUE_GROWTH_CLASS}}">{{REVENUE_GROWTH}}</td>
+      <td>{{REVENUE_INDUSTRY_AVG}}</td>
+    </tr>
+    <tr>
+      <td>归母净利润</td>
+      <td>{{NET_PROFIT}}</td>
+      <td class="{{NET_PROFIT_GROWTH_CLASS}}">{{NET_PROFIT_GROWTH}}</td>
+      <td>{{NET_PROFIT_INDUSTRY_AVG}}</td>
+    </tr>
+    <tr>
+      <td>扣非净利润</td>
+      <td>{{NON_RECURRING_NET_PROFIT}}</td>
+      <td class="{{NON_RECURRING_GROWTH_CLASS}}">{{NON_RECURRING_GROWTH}}</td>
+      <td>{{NON_RECURRING_INDUSTRY_AVG}}</td>
+    </tr>
+    <tr>
+      <td>毛利率</td>
+      <td>{{GROSS_MARGIN}}</td>
+      <td class="{{GROSS_MARGIN_CHANGE_CLASS}}">{{GROSS_MARGIN_CHANGE}}</td>
+      <td>{{GROSS_MARGIN_INDUSTRY_AVG}}</td>
+    </tr>
+    <tr>
+      <td>营业利润率</td>
+      <td>{{OPERATING_MARGIN}}</td>
+      <td>—</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td>净利率</td>
+      <td>{{NET_MARGIN}}</td>
+      <td>—</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td>ROE</td>
+      <td>{{ROE}}</td>
+      <td class="{{ROE_CHANGE_CLASS}}">{{ROE_CHANGE}}</td>
+      <td>{{ROE_INDUSTRY_AVG}}</td>
+    </tr>
+    <tr>
+      <td>经营活动现金流</td>
+      <td>{{OPERATING_CASH_FLOW}}</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="chart-container">
+  <img src="{{CHART_FINANCIAL_OVERVIEW}}" alt="核心财务指标对比">
+  <p class="chart-caption">图1 核心财务指标对比（单位：亿元）</p>
+</div>
+
+<!-- 1.2 分部收入与增速 (条件渲染) -->
+{{SECTION_SEGMENT_BREAKDOWN}}
+
+<!-- 1.3 核心运营指标 (条件渲染) -->
+{{SECTION_OPERATIONAL_KPIS}}
+
+<!-- ==================== 第2章 三张报表深度分析 ==================== -->
+<h2>2. 三张报表深度分析</h2>
+
+<!-- 2.1 利润表 -->
+<h3>2.1 利润表：盈利质量分析</h3>
+<div class="section-card">
+  <h4>分部盈利能力拆解</h4>
+  <p>{{PROFITABILITY_ANALYSIS}}</p>
+
+  <h4>费用结构分析</h4>
+  {{EXPENSE_TABLE}}
+
+  <div class="chart-container">
+    <img src="{{CHART_PROFITABILITY}}" alt="盈利能力指标">
+    <p class="chart-caption">图3 盈利能力指标分析</p>
+  </div>
+
+  {{BP_PROBE_PROFITABILITY}}
+</div>
+
+<!-- 2.2 资产负债表 -->
+<h3>2.2 资产负债表：运营效率分析</h3>
+<div class="section-card">
+  <h4>偿债安全指标</h4>
+  {{SOLVENCY_TABLE}}
+
+  <h4>运营效率指标</h4>
+  {{EFFICIENCY_TABLE}}
+
+  <div class="chart-container">
+    <img src="{{CHART_EFFICIENCY}}" alt="运营效率指标">
+    <p class="chart-caption">图4 运营效率指标</p>
+  </div>
+
+  <h4>效率深度分析</h4>
+  <p>{{EFFICIENCY_ANALYSIS}}</p>
+
+  {{BP_PROBE_SOLVENCY}}
+</div>
+
+<!-- 2.3 现金流量表 -->
+<h3>2.3 现金流量表：造血能力分析</h3>
+<div class="section-card">
+  <h4>三类现金流对比</h4>
+  {{CASHFLOW_TABLE}}
+
+  <div class="charts-row">
+    <div class="chart-container">
+      <img src="{{CHART_CASH_FLOW}}" alt="现金流结构">
+      <p class="chart-caption">图5 现金流结构对比（亿元）</p>
+    </div>
+    <div class="chart-container">
+      <img src="{{CHART_ASSET_STRUCTURE}}" alt="资产结构分布">
+      <p class="chart-caption">图6 资产结构分布</p>
+    </div>
+  </div>
+
+  <h4>现金流质量指标</h4>
+  {{CASHFLOW_QUALITY_TABLE}}
+
+  <p>{{CASHFLOW_ANALYSIS}}</p>
+
+  {{BP_PROBE_CASHFLOW}}
+</div>
+
+<!-- ==================== 第3章 BP视角决策建议 ==================== -->
+<h2>3. BP视角决策建议</h2>
+
+<div class="section-card">
+  <h3>3.1 业务组合调整建议</h3>
+  {{BCG_MATRIX_TABLE}}
+  <p><strong>业务组合策略：</strong></p>
+  {{SEGMENT_STRATEGY}}
+  {{RED_LINE_MANAGEMENT}}
+  {{CAPITAL_PLANNING}}
+</div>
+
+<!-- ==================== 第4章 结论与建议 ==================== -->
+<h2>4. 结论与建议</h2>
+<div class="conclusion-box">
+  <p><strong>核心优势：</strong></p>
+  <ul>
+    {{ADVANTAGES_LIST}}
+  </ul>
+
+  <p><strong>主要风险：</strong></p>
+  <ul>
+    {{RISKS_LIST}}
+  </ul>
+
+  <p><strong>综合评价：</strong></p>
+  <p>{{OVERALL_ASSESSMENT}}</p>
+</div>
+
+</body>
+</html>
