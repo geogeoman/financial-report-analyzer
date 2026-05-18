@@ -1,13 +1,20 @@
 ---
 name: financial-report-analyzer
 description: This skill should be used when the user asks to "analyze a financial report", "analyze this annual report", "analyze this quarterly report", "分析财报", "分析年报", "分析季报", "financial report analysis", or provides a path to a PDF/text file that appears to be a financial report. Provides systematic financial report analysis including data extraction, ratio calculation, chart generation, and professional HTML report output.
-version: 2.0.0
+version: 2.1.0
+python-env: "C:\\anaconda\\envs\\financial"
 allowed-tools: [Bash, Read, Write, Glob, Grep]
 ---
 
 # Financial Report Analyzer
 
 You are a professional financial analysis tool. Follow this workflow systematically when analyzing financial reports (annual reports, quarterly reports).
+
+## Runtime Environment
+
+- **Python**: Use the `financial` conda environment at `C:\anaconda\envs\financial`
+- **Invoke scripts with**: `"C:/anaconda/envs/financial/python.exe" <script_path> [args]`
+- **Dependencies (pre-installed)**: pdfplumber, matplotlib
 
 ## Workflow
 
@@ -16,7 +23,7 @@ You are a professional financial analysis tool. Follow this workflow systematica
 Run the extraction script to pull core financial data from the report file:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/scripts/extract_financials.py" '{"file_path": "<path to report file>"}'
+"C:/anaconda/envs/financial/python.exe" "${CLAUDE_PLUGIN_ROOT}/scripts/extract_financials.py" '{"file_path": "<path to report file>"}'
 ```
 
 This supports PDF (via pdfplumber) and plain text files. The output is JSON with keys: `revenue`, `net_profit`, `total_assets`, `total_liabilities`, `equity`, `operating_cash_flow`, `cost_of_sales`, `company_name`, `report_year`, plus expanded fields: `segment_data`, `operating_kpis`, expense breakdown, cash flow details, and prior-year comparatives.
@@ -35,7 +42,7 @@ Record this output as `raw_data`.
 Pass the augmented `raw_data` JSON to the ratio calculation script:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/scripts/calculate_ratios.py" '<raw_data_json>'
+"C:/anaconda/envs/financial/python.exe" "${CLAUDE_PLUGIN_ROOT}/scripts/calculate_ratios.py" '<raw_data_json>'
 ```
 
 This computes 60+ template placeholder values including:
@@ -53,10 +60,10 @@ Record output as `ratio_data`.
 Generate up to 6 visualization charts:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/scripts/generate_charts.py" '<raw_data_json>'
+"C:/anaconda/envs/financial/python.exe" "${CLAUDE_PLUGIN_ROOT}/scripts/generate_charts.py" --output-dir "<report_output_directory>" '<raw_data_json>'
 ```
 
-Charts produced (in `${CLAUDE_PLUGIN_ROOT}/scripts/`):
+Charts produced (in the specified `--output-dir`, or `${CLAUDE_PLUGIN_ROOT}/scripts/` as fallback):
 - `financial_overview.png` — bar chart of key metrics (always generated)
 - `profitability.png` — horizontal bar chart of profitability ratios (always generated)
 - `asset_structure.png` — donut chart of asset structure (always generated)
@@ -95,6 +102,8 @@ Write the following analysis segments:
 - KPI badges: `<span class="kpi-badge">追踪KPI</span>`, `<span class="kpi-badge ok">达标KPI</span>`, `<span class="kpi-badge warn">预警KPI</span>`
 - BCG strategy items: `<li><strong>业务名——"象限"策略：</strong>具体建议。追踪KPI：<span class="kpi-badge">KPI1</span> <span class="kpi-badge ok">KPI2</span></li>`
 
+**After writing all analysis segments, save them to `analysis_sections.json`** in the report output directory. This file is required for the archival step (Step 7).
+
 ### Step 5: Report Rendering
 
 Read the HTML template:
@@ -120,10 +129,38 @@ Output a brief summary with:
 - The generated report file path
 - 2-3 key findings from the analysis
 - Any data quality concerns (missing fields, unusual values)
+- The archive location (after Step 7)
+
+### Step 7: Data Archival (NEW in v2.1)
+
+Archive all analysis outputs to the standardized data directory for future time-series and industry comparison analysis:
+
+```bash
+"C:/anaconda/envs/financial/python.exe" "${CLAUDE_PLUGIN_ROOT}/scripts/archive_data.py" \
+  --company "<company_name>" \
+  --period "<FY2025 or FY2025Q1>" \
+  --raw-data "<path_to_raw_data.json>" \
+  --ratio-data "<path_to_ratio_data.json>" \
+  --analysis "<path_to_analysis_sections.json>" \
+  --charts <list_of_chart_png_paths> \
+  --report "<path_to_html_report>" \
+  --base-dir "C:/financial/data" \
+  --source-file "<original_pdf_filename>" \
+  --report-type "<annual|quarterly|semi-annual>"
+```
+
+The archival script:
+1. Creates the standardized directory: `C:/financial/data/{company}/{period}/`
+2. Copies all files with standardized naming (`{company}_{period}_{filename}`)
+3. Updates the master index at `C:/financial/data/manifest.json`
+4. Prints a summary JSON confirming archival
+
+Report the archive path in the completion summary.
 
 ## Important Rules
 
-- Before running scripts, ensure dependencies are installed: `pip install pdfplumber matplotlib` (skip if already installed)
+- All scripts must be invoked via the `financial` conda environment Python (`C:/anaconda/envs/financial/python.exe`)
+- The `financial` conda environment has all dependencies pre-installed (pdfplumber, matplotlib). If scripts fail with import errors, verify the environment at `C:\anaconda\envs\financial` is intact.
 - Always cross-check extracted numbers against the original report when possible
 - When the extraction script misses key fields, manually read the PDF text and supplement the `raw_data` JSON
 - Pay attention to non-recurring profit/loss to assess true core business profitability

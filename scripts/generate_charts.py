@@ -689,7 +689,26 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        arg = sys.argv[1]
+        # Parse optional --output-dir flag (v2.1)
+        out_dir = None
+        json_arg_idx = 1
+
+        if sys.argv[1] == "--output-dir":
+            if len(sys.argv) < 4:
+                print(
+                    json.dumps(
+                        {"error": "--output-dir requires a path and JSON data argument."},
+                        ensure_ascii=False,
+                    )
+                )
+                sys.exit(1)
+            out_dir = sys.argv[2]
+            json_arg_idx = 3
+        elif sys.argv[1].startswith("--output-dir="):
+            out_dir = sys.argv[1].split("=", 1)[1]
+            json_arg_idx = 2
+
+        arg = sys.argv[json_arg_idx]
         parsed = json.loads(arg)
 
         # Unwrap single-key wrappers like {"financial_data": {...}} or {"data": {...}}
@@ -699,11 +718,12 @@ if __name__ == "__main__":
                 if isinstance(only_value, dict):
                     parsed = only_value
 
-        # Use OUTPUT_DIR env var if set (injected by manage.py),
-        # otherwise fall back to the script's own directory.
-        out_dir = os.environ.get("OUTPUT_DIR") or os.path.dirname(
-            os.path.abspath(__file__)
-        )
+        # Priority: --output-dir flag > OUTPUT_DIR env var > script directory
+        if out_dir is None:
+            out_dir = os.environ.get("OUTPUT_DIR") or os.path.dirname(
+                os.path.abspath(__file__)
+            )
+
         chart_paths = generate_charts(parsed, out_dir)
         result = {
             "charts": chart_paths,
